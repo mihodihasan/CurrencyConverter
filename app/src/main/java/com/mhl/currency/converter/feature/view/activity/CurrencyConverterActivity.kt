@@ -13,33 +13,34 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mhl.currency.converter.R
-import com.mhl.currency.converter.feature.model.CurrencyConverterImpl
-import com.mhl.currency.converter.feature.model.CurrencyConverterModel
+import com.mhl.currency.converter.feature.model.CurrencyRepositoryModel
+import com.mhl.currency.converter.feature.model.CurrencyRepositoryModelImpl
 import com.mhl.currency.converter.feature.model.data.ConvertedExchnageRate
 import com.mhl.currency.converter.feature.model.data.UnitCurrency
 import com.mhl.currency.converter.feature.view.adapter.ExchangeRateRecyclerAdapter
 import com.mhl.currency.converter.feature.view.adapter.SpinnerCustomAdapter
 import com.mhl.currency.converter.feature.viewmodel.CurrencyConverterViewModel
+import com.mhl.currency.converter.feature.viewmodel.RoomViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 
 class CurrencyConverterActivity : AppCompatActivity() {
-
+    private lateinit var roomViewModel: RoomViewModel
     lateinit var spinnerAdapter: SpinnerCustomAdapter
     lateinit var recyclerAdapter: ExchangeRateRecyclerAdapter
     private lateinit var currencyList: MutableList<UnitCurrency>
     private lateinit var convertedValues: MutableList<ConvertedExchnageRate>
     var spinnerSelectedPosition: Int = 0
 
-    private lateinit var model: CurrencyConverterModel
+    private lateinit var model: CurrencyRepositoryModel
     private lateinit var viewModel: CurrencyConverterViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        model = CurrencyConverterImpl(applicationContext)
+        roomViewModel = ViewModelProvider(this).get(RoomViewModel::class.java)
+        model = CurrencyRepositoryModelImpl(applicationContext, roomViewModel)
         viewModel = ViewModelProvider(this).get(CurrencyConverterViewModel::class.java)
-
 
         setUi()
         setLiveDataListeners()
@@ -68,6 +69,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
             Observer {
                 search_results_recycler.visibility= VISIBLE
                 error_tv.visibility= GONE
+                last_updated_tv.text=it.lastUpdated
             })
         viewModel.exchangeRateFailureLiveData.observe(this,
             Observer {

@@ -1,4 +1,4 @@
-package com.mhl.currency.converter.feature.model
+package com.mhl.currency.converter.feature.model.remote
 
 import android.content.Context
 import com.google.gson.Gson
@@ -9,8 +9,10 @@ import com.mhl.currency.converter.feature.model.data.Currency
 import com.mhl.currency.converter.feature.model.data.ExchangeRate
 import com.mhl.currency.converter.feature.model.data.UnitCurrency
 import com.mhl.currency.converter.feature.model.data.UnitExchangeRate
+import com.mhl.currency.converter.feature.viewmodel.RoomViewModel
 import com.mhl.currency.converter.network.RetrofitApiInterface
 import com.mhl.currency.converter.network.RetrofitClient
+import com.mhl.currency.converter.utility.Prefs
 import okhttp3.ResponseBody
 import org.json.JSONException
 import org.json.JSONObject
@@ -21,14 +23,19 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
-//TODO Add Repository, Local, Remote Architecture Later
-class CurrencyConverterImpl(private val context: Context) : CurrencyConverterModel {
-    val dateFormat: SimpleDateFormat = SimpleDateFormat(
-        "MMM DD, yyyy hh:mm a",
-        Locale.US
-    )
+class RemoteCurrencyRepoModelImpl(context: Context, dateFormat: SimpleDateFormat, roomViewModel: RoomViewModel) :
+    RemoteCurrencyRepoModel {
+    lateinit var dateFormat: SimpleDateFormat
+    lateinit var context: Context
+    lateinit var roomViewModel: RoomViewModel
 
-    override fun getCurrencyList(callback: RequestCompleteListener<Currency>) {
+    init {
+        this.dateFormat = dateFormat
+        this.context = context
+        this.roomViewModel = roomViewModel
+    }
+
+    override fun getRemoteCurrencyList(callback: RequestCompleteListener<Currency>) {
         val apiInterface: RetrofitApiInterface =
             RetrofitClient.client.create(RetrofitApiInterface::class.java)
         val call: Call<ResponseBody> = apiInterface.getAllAvailableCurrencyList()
@@ -36,6 +43,7 @@ class CurrencyConverterImpl(private val context: Context) : CurrencyConverterMod
         call.enqueue(object : Callback<ResponseBody> {
 
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                Prefs(context).saveCurrentTimeToSharedPref("LAST_UPDATE_CURRENCY_LIST", Date().toString())
                 val currency: Currency?
                 val currencyList: MutableList<UnitCurrency> = mutableListOf()
                 if (response.body() != null) {
@@ -56,9 +64,12 @@ class CurrencyConverterImpl(private val context: Context) : CurrencyConverterMod
                                 val currencyMap =
                                     currenciesMap[currenciesMap.keys.toTypedArray()[0]] ?: error("")
                                 val itr = currencyMap.entries.iterator()
+                                roomViewModel.deleteAllCurrency()
                                 while (itr.hasNext()) {
                                     val entry = itr.next()
-                                    currencyList.add(UnitCurrency(entry.key, entry.value))
+                                    val unitCurrency = UnitCurrency(entry.key, entry.value)
+                                    currencyList.add(unitCurrency)
+                                    roomViewModel.insertCurrency(unitCurrency)
                                 }
                                 currency = Currency(dateFormat.format(Date()), currencyList)
                                 callback.onRequestSuccess(currency)
@@ -88,7 +99,7 @@ class CurrencyConverterImpl(private val context: Context) : CurrencyConverterMod
         })
     }
 
-    override fun getExchangeRates(callback: RequestCompleteListener<ExchangeRate>) {
+    override fun getRemoteExchangeRates(callback: RequestCompleteListener<ExchangeRate>) {
         val apiInterface: RetrofitApiInterface =
             RetrofitClient.client.create(RetrofitApiInterface::class.java)
         val call: Call<ResponseBody> = apiInterface.getAllAvailableExchnageRates()
@@ -96,6 +107,7 @@ class CurrencyConverterImpl(private val context: Context) : CurrencyConverterMod
         call.enqueue(object : Callback<ResponseBody> {
 
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                Prefs(context).saveCurrentTimeToSharedPref("LAST_UPDATE_EXCHANGE_RATES", Date().toString())
                 val exchangeRate: ExchangeRate?
                 val unitExchangeRateList: MutableList<UnitExchangeRate> = mutableListOf()
                 if (response.body() != null) {
@@ -118,14 +130,12 @@ class CurrencyConverterImpl(private val context: Context) : CurrencyConverterMod
                                 val currencyMap =
                                     currenciesMap[currenciesMap.keys.toTypedArray()[0]] ?: error("")
                                 val itr = currencyMap.entries.iterator()
+                                roomViewModel.deleteAllExchangeRates()
                                 while (itr.hasNext()) {
                                     val entry = itr.next()
-                                    unitExchangeRateList.add(
-                                        UnitExchangeRate(
-                                            entry.key,
-                                            entry.value
-                                        )
-                                    )
+                                    val unitExchangeRate=UnitExchangeRate(entry.key, entry.value)
+                                    unitExchangeRateList.add(unitExchangeRate)
+                                    roomViewModel.insertExchangeRate(unitExchangeRate)
                                 }
                                 exchangeRate = ExchangeRate(Date().toString(), unitExchangeRateList)
                                 callback.onRequestSuccess(exchangeRate)
@@ -154,4 +164,5 @@ class CurrencyConverterImpl(private val context: Context) : CurrencyConverterMod
             }
         })
     }
+
 }

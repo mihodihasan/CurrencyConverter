@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.mhl.currency.converter.common.RequestCompleteListener
-import com.mhl.currency.converter.feature.model.CurrencyConverterModel
+import com.mhl.currency.converter.feature.model.CurrencyRepositoryModel
 import com.mhl.currency.converter.feature.model.data.ConvertedExchnageRate
 import com.mhl.currency.converter.feature.model.data.Currency
 import com.mhl.currency.converter.feature.model.data.ExchangeRate
@@ -22,7 +22,7 @@ class CurrencyConverterViewModel : ViewModel() {
 
     //TODO Use Dagger to remove this model dependency and make this loosely coupled
 
-    fun getAvailableCurrencyList(model: CurrencyConverterModel) {
+    fun getAvailableCurrencyList(model: CurrencyRepositoryModel) {
         progressBarLiveData.postValue(true)
         model.getCurrencyList(object :
             RequestCompleteListener<Currency> {
@@ -41,7 +41,7 @@ class CurrencyConverterViewModel : ViewModel() {
     fun updateConvertedCurrenciesValues(
         amount: Double,
         selectedCurrency: String,
-        model: CurrencyConverterModel
+        model: CurrencyRepositoryModel
     ) {
         progressBarLiveData.postValue(true)
 
@@ -63,7 +63,7 @@ class CurrencyConverterViewModel : ViewModel() {
         progressBarLiveData.postValue(false)
     }
 
-    fun getAvailableExchangeRates(model: CurrencyConverterModel) {
+    fun getAvailableExchangeRates(model: CurrencyRepositoryModel) {
 
         progressBarLiveData.postValue(true)
         exchangeRateFailureLiveData.postValue("Please wait... loading exchange rates..")

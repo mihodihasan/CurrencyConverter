@@ -12,7 +12,7 @@ import com.mhl.currency.converter.feature.model.data.UnitExchangeRate
 interface CurrencyDAO {
 
     @Query("SELECT * from tb_currency_name")
-    fun getCurrencyNames(): LiveData<List<UnitCurrency>>
+    suspend fun getCurrencyNames(): MutableList<UnitCurrency>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(currency: UnitCurrency)
@@ -21,7 +21,7 @@ interface CurrencyDAO {
     suspend fun deleteAllCurrencies()
 
     @Query("SELECT * from tb_exchange_rate")
-    fun getExchangeRates(): LiveData<List<UnitExchangeRate>>
+    suspend fun getExchangeRates(): MutableList<UnitExchangeRate>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(exchangeRate: UnitExchangeRate)

@@ -10,7 +10,6 @@ import com.mhl.currency.converter.feature.model.data.Currency
 import com.mhl.currency.converter.feature.model.data.ExchangeRate
 import com.mhl.currency.converter.feature.model.data.UnitExchangeRate
 
-//TODO this file is completely Android SDK dependency free
 class CurrencyConverterViewModel : ViewModel() {
     val currencyLiveData = MutableLiveData<Currency>()
     val currencyFailureLiveData = MutableLiveData<String>()
@@ -18,9 +17,10 @@ class CurrencyConverterViewModel : ViewModel() {
     val exchangeRateFailureLiveData = MutableLiveData<String>()
     val progressBarLiveData = MutableLiveData<Boolean>()
     val convertedCurrencies : MutableList<ConvertedExchnageRate> = mutableListOf()
+    val convertedCurrenciesBackup : MutableList<ConvertedExchnageRate> = mutableListOf()
     val updatedRecyclerItemsList = MutableLiveData<MutableList<ConvertedExchnageRate>>()
 
-    //TODO Use Dagger to remove this model dependency and make this loosely coupled
+    //TODO Use Dagger later
 
     fun getAvailableCurrencyList(model: CurrencyRepositoryModel) {
         progressBarLiveData.postValue(true)
@@ -45,7 +45,6 @@ class CurrencyConverterViewModel : ViewModel() {
     ) {
         progressBarLiveData.postValue(true)
 
-        Log.d("LSN_ERR_ER", convertedCurrencies.toString())
         var selectedExchangeRate: Double = 1.0
         run loop@{
             convertedCurrencies?.forEach {
@@ -56,7 +55,6 @@ class CurrencyConverterViewModel : ViewModel() {
             }
         }
         convertedCurrencies?.forEach {
-            Log.d("LSN_ERR_EV", ""+it.exchangeRate + " "+amount+" "+selectedExchangeRate)
             it.convertedAmount = it.exchangeRate * amount/selectedExchangeRate
         }
         updatedRecyclerItemsList.postValue(convertedCurrencies)
@@ -77,6 +75,7 @@ class CurrencyConverterViewModel : ViewModel() {
                     tempList.add(ConvertedExchnageRate(0.0, it.currencyCode, it.rate))
                 }
                 convertedCurrencies.addAll(tempList)
+                convertedCurrenciesBackup.addAll(tempList)
             }
 
             override fun onRequestFailed(errorMessage: String) {
@@ -84,5 +83,23 @@ class CurrencyConverterViewModel : ViewModel() {
                 exchangeRateFailureLiveData.postValue(errorMessage)
             }
         })
+    }
+
+    fun filterResults(
+        searchKey: String
+    ) {
+        progressBarLiveData.postValue(true)
+        convertedCurrencies.clear()
+        if (searchKey.length>0){
+            convertedCurrenciesBackup.forEach {
+                if (it.currencyName.toLowerCase().contains(searchKey.toLowerCase())){
+                    convertedCurrencies.add(it)
+                }
+            }
+        } else{
+            convertedCurrencies.addAll(convertedCurrenciesBackup)
+        }
+        updatedRecyclerItemsList.postValue(convertedCurrencies)
+        progressBarLiveData.postValue(false)
     }
 }

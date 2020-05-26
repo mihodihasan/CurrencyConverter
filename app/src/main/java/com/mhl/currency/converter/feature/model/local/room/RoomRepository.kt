@@ -6,8 +6,17 @@ import com.mhl.currency.converter.feature.model.data.UnitExchangeRate
 
 class RoomRepository(private val dao : CurrencyDAO) {
 
-    val allCurrencyList:LiveData<List<UnitCurrency>> = dao.getCurrencyNames()
-    val allExchangeRates:LiveData<List<UnitExchangeRate>> = dao.getExchangeRates()
+//    val allCurrencyList:LiveData<List<UnitCurrency>> = dao.getCurrencyNames()
+//    val allExchangeRates:LiveData<List<UnitExchangeRate>> = dao.getExchangeRates()
+
+     suspend fun getAllAvailableCurrencies():MutableList<UnitCurrency>{
+        return dao.getCurrencyNames()
+    }
+
+     suspend fun getAllExchangeRates():MutableList<UnitExchangeRate>{
+        return dao.getExchangeRates()
+    }
+
 
     suspend fun insertCurrency(currency: UnitCurrency) {
         dao.insert(currency)

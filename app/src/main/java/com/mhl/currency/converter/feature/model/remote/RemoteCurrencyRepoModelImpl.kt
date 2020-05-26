@@ -20,17 +20,14 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.*
 
-class RemoteCurrencyRepoModelImpl(context: Context, dateFormat: SimpleDateFormat, roomViewModel: RoomViewModel) :
+class RemoteCurrencyRepoModelImpl(context: Context, roomViewModel: RoomViewModel) :
     RemoteCurrencyRepoModel {
-    lateinit var dateFormat: SimpleDateFormat
     lateinit var context: Context
     lateinit var roomViewModel: RoomViewModel
 
     init {
-        this.dateFormat = dateFormat
         this.context = context
         this.roomViewModel = roomViewModel
     }
@@ -71,7 +68,7 @@ class RemoteCurrencyRepoModelImpl(context: Context, dateFormat: SimpleDateFormat
                                     currencyList.add(unitCurrency)
                                     roomViewModel.insertCurrency(unitCurrency)
                                 }
-                                currency = Currency(dateFormat.format(Date()), currencyList)
+                                currency = Currency(Date().toString(), currencyList)
                                 callback.onRequestSuccess(currency)
                             } else {
                                 var res = response.body()!!.string()

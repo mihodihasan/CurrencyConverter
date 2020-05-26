@@ -14,15 +14,23 @@ import kotlinx.coroutines.launch
 class RoomViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: RoomRepository
-    val allCurrencies: LiveData<List<UnitCurrency>>
-    val allExchangeRates: LiveData<List<UnitExchangeRate>>
+//    val allCurrencies: LiveData<List<UnitCurrency>>
+//    val allExchangeRates: LiveData<List<UnitExchangeRate>>
 
     init {
         val dao = CurrencyDB.getDatabase(application, viewModelScope).currencyDao()
         repository = RoomRepository(dao)
-        allCurrencies = repository.allCurrencyList
-        allExchangeRates = repository.allExchangeRates
+//        allCurrencies = repository.allCurrencyList
+//        allExchangeRates = repository.allExchangeRates
     }
+
+    suspend fun getAllAvailableCurrencies():MutableList<UnitCurrency>  {
+        return repository.getAllAvailableCurrencies()
+    }
+    suspend fun getAllExchangeRates():MutableList<UnitExchangeRate>  {
+        return repository.getAllExchangeRates()
+    }
+
 
     fun insertExchangeRate(exchangeRate: UnitExchangeRate) = viewModelScope.launch(Dispatchers.IO) {
         repository.insertExchangeRate(exchangeRate)

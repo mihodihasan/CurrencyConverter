@@ -69,7 +69,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
             Observer {
                 search_results_recycler.visibility= VISIBLE
                 error_tv.visibility= GONE
-                last_updated_tv.text=it.lastUpdated
+                last_updated_tv.text="Rates Last Updated On "+it.lastUpdated
             })
         viewModel.exchangeRateFailureLiveData.observe(this,
             Observer {
@@ -109,8 +109,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
                 spinnerSelectedPosition = position
                 viewModel.currencyLiveData.value?.currencies?.get(position)?.currencyCode?.let {
                     var input: Double = 0.0
-                    if (input_number_et.text.toString() == null || input_number_et.text.toString() == "") {
-                    } else {
+                    if (input_number_et.text.toString() != null && input_number_et.text.toString() != "") {
                         input = input_number_et.text.toString().toDouble()
                     }
                     viewModel.updateConvertedCurrenciesValues(
@@ -140,11 +139,13 @@ class CurrencyConverterActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                if(input_number_et.text.toString()!=null && input_number_et.text.toString()!="")
                 viewModel.updateConvertedCurrenciesValues(input_number_et.text.toString().toDouble(), currencyList[spinnerSelectedPosition].currencyCode, model)
+                else viewModel.updateConvertedCurrenciesValues(0.0, currencyList[spinnerSelectedPosition].currencyCode, model)
             }
         })
 
-        input_number_et.addTextChangedListener(object : TextWatcher {
+        filter_search_result_et.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
             }
 
@@ -152,6 +153,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                viewModel.filterResults(p0.toString())
             }
         })
 

@@ -9,18 +9,18 @@ class Prefs(context: Context) {
     lateinit var editor: SharedPreferences.Editor
 
     init {
-        this.context=context
+        this.context = context
         sharedPreferences =
             context.getSharedPreferences("CURRENCY_SHARED_PREF", Context.MODE_PRIVATE)
         editor = sharedPreferences.edit()
     }
 
-    fun saveCurrentTimeToSharedPref(key:String, value: String) {
+    fun saveCurrentTimeToSharedPref(key: String, value: String) {
         editor.putString(key, value)
         editor.apply()
     }
 
-    fun getCurrentTimeFromSharedPref(key : String): String? {
+    fun getCurrentTimeFromSharedPref(key: String): String? {
         return sharedPreferences.getString(key, null)
     }
 }
